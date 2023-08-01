@@ -1,18 +1,15 @@
 ﻿using holiday.search.Clients;
 using holiday.search.Models;
-using Microsoft.Extensions.Logging;
 
 namespace holiday.search.tests.Clients
 {
     public class FlightDataClientTests
     {
-        private readonly Mock<ILogger<FlightDataClient>> _loggerMock = new();
-
         private readonly FlightDataClient _sut;
 
         public FlightDataClientTests()
         {
-            _sut = new FlightDataClient(_loggerMock.Object);
+            _sut = new FlightDataClient();
         }
 
         [Fact]
@@ -25,5 +22,15 @@ namespace holiday.search.tests.Clients
             Assert.IsType<List<FlightDataModel>>(response);
         }
 
+        [Fact]
+        public void Get_Deserializes_Json_From_Asset_File()
+        {
+            // Act
+            var response = _sut.Get();
+
+            // Assert
+            Assert.NotEmpty(response);
+            Assert.NotNull(response.Where(x => x.Id == 1));
+        }
     }
 }

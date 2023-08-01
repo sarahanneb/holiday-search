@@ -1,20 +1,23 @@
 ﻿using holiday.search.Clients.Interfaces;
 using holiday.search.Models;
+using System.Text.Json;
 
 namespace holiday.search.Clients
 {
     public class FlightDataClient : IFlightDataClient
     {
-        private readonly ILogger<FlightDataClient> _logger;
-
-        public FlightDataClient(ILogger<FlightDataClient> logger)
-        {
-            _logger = logger;
-        }
+        public FlightDataClient() { }
 
         public List<FlightDataModel> Get()
         {
-            return new List<FlightDataModel>();
+            var fileName = "./Assets/flights.json";
+            var jsonString = File.ReadAllText(fileName);
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            List<FlightDataModel> flightDataList = JsonSerializer.Deserialize<List<FlightDataModel>>(jsonString, options)!;
+
+            return flightDataList;
         }
     }
 }
