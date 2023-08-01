@@ -1,4 +1,6 @@
-﻿namespace holiday.search.Models
+﻿using System.Text.Json.Serialization;
+
+namespace holiday.search.Models
 {
     public class FlightDataModel
     {
@@ -7,6 +9,8 @@
         public string From { get; set; } = string.Empty;
         public string To { get; set; } = string.Empty;
         public int Price { get; set; }
+
+        [JsonPropertyName("departure_date")]
         public string DepartureDate { get; set; } = string.Empty;
     }
 }

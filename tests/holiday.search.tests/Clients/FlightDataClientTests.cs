@@ -30,7 +30,23 @@ namespace holiday.search.tests.Clients
 
             // Assert
             Assert.NotEmpty(response);
-            Assert.NotNull(response.Where(x => x.Id == 1));
+            Assert.NotNull(response.Where(x => x.Id == 1).FirstOrDefault());
+        }
+
+        [Fact]
+        public void Get_Should_Deserialize_All_Properties()
+        {
+            // Act
+            var response = _sut.Get();
+
+            // Assert
+            Assert.NotEmpty(response);
+            Assert.Null(response.Where(x => x.Id == default).FirstOrDefault());
+            Assert.Null(response.Where(x => x.Airline == string.Empty).FirstOrDefault());
+            Assert.Null(response.Where(x => x.From == string.Empty).FirstOrDefault());
+            Assert.Null(response.Where(x => x.To == string.Empty).FirstOrDefault());
+            Assert.Null(response.Where(x => x.Price == default).FirstOrDefault());
+            Assert.Null(response.Where(x => x.DepartureDate == string.Empty).FirstOrDefault());
         }
     }
 }
