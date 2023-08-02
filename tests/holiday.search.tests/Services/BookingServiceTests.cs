@@ -19,8 +19,6 @@ namespace holiday.search.tests.Services
         {
             SetupTestData();
 
-
-
             _sut = new BookingService(_flightDataServiceMock.Object, _hotelDataServiceMock.Object);
         }
 

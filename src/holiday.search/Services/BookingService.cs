@@ -32,6 +32,7 @@ namespace holiday.search.Services
         {
             Expression<Func<FlightDataModel, bool>> filter = x => 
                 x.DepartureDate == request.DepartureDate
+                && x.From == request.DepartingFrom
                 && x.To == request.TravellingTo;
 
             var filteredFlights = _flightDataService.Get(filter);
@@ -45,6 +46,7 @@ namespace holiday.search.Services
         {
             Expression<Func<HotelDataModel, bool>> filter = x => 
                 x.Nights == request.Duration
+                && x.ArrivalDate == request.DepartureDate
                 && x.LocalAirports.Contains(request.TravellingTo);
 
             var filteredHotels = _hotelDataService.Get(filter);
@@ -56,12 +58,14 @@ namespace holiday.search.Services
 
         private static List<BookingResponseModel> CreateResponse(List<FlightDataModel> flights, List<HotelDataModel> hotels)
         {
-            var flight = flights.First();
-            var hotel = hotels.First();
+            var response = new List<BookingResponseModel>();
 
-            return new List<BookingResponseModel>()
+            for (var i = 0; i < flights.Count && i < hotels.Count; i++)
             {
-                new BookingResponseModel
+                var flight = flights[i];
+                var hotel = hotels[i];
+
+                response.Add(new BookingResponseModel
                 {
                     TotalPrice = flight.Price + (hotel.PricePerNight * hotel.Nights),
                     FlightId = flight.Id,
@@ -71,8 +75,10 @@ namespace holiday.search.Services
                     HotelId = hotel.Id,
                     HotelName = hotel.Name,
                     HotelPrice = hotel.PricePerNight * hotel.Nights
-                }
-            };
+                });
+            }
+
+            return response;
         }
     }
 }
