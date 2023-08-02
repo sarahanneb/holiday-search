@@ -9,6 +9,8 @@ namespace holiday.search.Services
         private readonly IFlightDataService _flightDataService;
         private readonly IHotelDataService _hotelDataService;
 
+        private readonly List<string> LondonAirportChoices = new() { "LTN", "LGW" };
+
         public BookingService(IFlightDataService flightDataService, IHotelDataService hotelDataService)
         {
             _flightDataService = flightDataService;
@@ -30,17 +32,14 @@ namespace holiday.search.Services
 
         private List<FlightDataModel> GetFlightData(BookingRequestModel request)
         {
-            Expression<Func<FlightDataModel, bool>> filter = x => 
-                x.DepartureDate == request.DepartureDate
-                && x.From == request.DepartingFrom
-                && x.To == request.TravellingTo;
+            var filter = CreateFlightFilter(request);
 
             var filteredFlights = _flightDataService.Get(filter);
 
             return filteredFlights == null || !filteredFlights.Any() 
                 ? new List<FlightDataModel>() 
                 : filteredFlights.OrderBy(x => x.Price).ToList();
-        }
+        }        
 
         private List<HotelDataModel> GetHotelData(BookingRequestModel request)
         {
@@ -54,6 +53,31 @@ namespace holiday.search.Services
             return filteredHotels == null || !filteredHotels.Any() 
                 ? new List<HotelDataModel>() 
                 : filteredHotels.OrderBy(x => x.PricePerNight).ToList();
+        }
+
+        private Expression<Func<FlightDataModel, bool>> CreateFlightFilter(BookingRequestModel request)
+        {
+            Expression<Func<FlightDataModel, bool>> filter = x =>
+                x.DepartureDate == request.DepartureDate
+                && x.To == request.TravellingTo;
+
+            switch (request.DepartingFrom)
+            {
+                case "":
+                    break;
+                case "ALL":
+                    break;
+                case "ALL LDN":
+                    var filterPrefix = filter.Compile();
+                    filter = x => filterPrefix(x) && LondonAirportChoices.Contains(x.From);
+                    break;
+                default:
+                    filterPrefix = filter.Compile();
+                    filter = x => filterPrefix(x) && x.From == request.DepartingFrom;
+                    break;
+            }
+
+            return filter;
         }
 
         private static List<BookingResponseModel> CreateResponse(List<FlightDataModel> flights, List<HotelDataModel> hotels)

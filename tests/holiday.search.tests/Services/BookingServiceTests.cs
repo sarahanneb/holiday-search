@@ -103,6 +103,58 @@ namespace holiday.search.tests.Services
             Assert.Equal(1100, response.First().TotalPrice);
         }
 
+        [Fact]
+        public void GetBookingInformation_Should_AddToFlightFilter_WhenDepartFrom_IsAllLondonAirports()
+        {
+            // Arrange
+            _flightDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<FlightDataModel, bool>>>())).Returns(new List<FlightDataModel>());
+            _hotelDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<HotelDataModel, bool>>>())).Returns(new List<HotelDataModel>());
+
+            // Act
+            _sut.GetBookingInformation(new BookingRequestModel { DepartingFrom = "ALL LDN" });
+
+            _flightDataServiceMock.Verify(x => x.Get(It.Is<Expression<Func<FlightDataModel, bool>>>( x => x.Body.ToString().Contains("x.From"))), Times.Once);
+        }
+
+        [Fact]
+        public void GetBookingInformation_Should_AddToFlightFilter_WhenDepartFrom_IsSpecificAirport()
+        {
+            // Arrange
+            _flightDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<FlightDataModel, bool>>>())).Returns(new List<FlightDataModel>());
+            _hotelDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<HotelDataModel, bool>>>())).Returns(new List<HotelDataModel>());
+
+            // Act
+            _sut.GetBookingInformation(new BookingRequestModel { DepartingFrom = "MAN" });
+
+            _flightDataServiceMock.Verify(x => x.Get(It.Is<Expression<Func<FlightDataModel, bool>>>(x => x.Body.ToString().Contains("x.From"))), Times.Once);
+        }
+
+        [Fact]
+        public void GetBookingInformation_ShouldNot_AddToFlightFilter_WhenDepartFrom_IsAllAirports()
+        {
+            // Arrange
+            _flightDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<FlightDataModel, bool>>>())).Returns(new List<FlightDataModel>());
+            _hotelDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<HotelDataModel, bool>>>())).Returns(new List<HotelDataModel>());
+
+            // Act
+            _sut.GetBookingInformation(new BookingRequestModel { DepartingFrom = "ALL" });
+
+            _flightDataServiceMock.Verify(x => x.Get(It.Is<Expression<Func<FlightDataModel, bool>>>(x => x.Body.ToString().Contains("x.From"))), Times.Never);
+        }
+
+        [Fact]
+        public void GetBookingInformation_ShouldNot_AddToFlightFilter_WhenDepartFrom_IsNotSpecified()
+        {
+            // Arrange
+            _flightDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<FlightDataModel, bool>>>())).Returns(new List<FlightDataModel>());
+            _hotelDataServiceMock.Setup(x => x.Get(It.IsAny<Expression<Func<HotelDataModel, bool>>>())).Returns(new List<HotelDataModel>());
+
+            // Act
+            _sut.GetBookingInformation(new BookingRequestModel { DepartingFrom = "" });
+
+            _flightDataServiceMock.Verify(x => x.Get(It.Is<Expression<Func<FlightDataModel, bool>>>(x => x.Body.ToString().Contains("x.From"))), Times.Never);
+        }
+
         private void SetupTestData()
         {
             TestFlightData.Add(new FlightDataModel
